@@ -1,39 +1,43 @@
 var express = require('express');
 var router = express.Router();
 
+const dbName = 'user-app-db'
+let mongoClient = require("mongodb").MongoClient;
 
-let users = {
-  1: {
-    id: '1',
-    username: 'Robin Wieruch',
-  },
-  2: {
-    id: '2',
-    username: 'Dave Davids',
-  },
-};
-
-let messages = {
-  1: {
-    id: '1',
-    text: 'Hello World',
-    userId: '1',
-  },
-  2: {
-    id: '2',
-    text: 'By World',
-    userId: '2',
-  },
-};
+mongoClient.connect("mongodb://bh-user-app-db:qDkE0nAplHp5g4bnBwAouIMA6kS2WgWUqU3kVylJ6KXkImJOBZWLG4VGgKNyWY6cKYNQlsI0qIX2vl32APbAIQ%3D%3D@bh-user-app-db.mongo.cosmos.azure.com:10255/?ssl=true&appName=@bh-user-app-db@",
+    function (err, client) {
+        client.close();
+    });
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send(Object.values(users));
+router.get('/', function (req, res, next) {
+    mongoClient.connect("mongodb://bh-user-app-db:qDkE0nAplHp5g4bnBwAouIMA6kS2WgWUqU3kVylJ6KXkImJOBZWLG4VGgKNyWY6cKYNQlsI0qIX2vl32APbAIQ%3D%3D@bh-user-app-db.mongo.cosmos.azure.com:10255/?ssl=true&appName=@bh-user-app-db@",
+        function (err, client) {
+
+            const db = client.db(dbName);
+
+            db.collection('users').find({}).project({_id: false, id: true, username: true}).toArray((error, users) => {
+                console.log(users);
+                res.send(users);
+            })
+            client.close();
+        });
+
 });
 
 router.get('/:userId', (req, res) => {
-  console.log(users[req.params.userId])
-  return res.send(users[req.params.userId]);
+    mongoClient.connect("mongodb://bh-user-app-db:qDkE0nAplHp5g4bnBwAouIMA6kS2WgWUqU3kVylJ6KXkImJOBZWLG4VGgKNyWY6cKYNQlsI0qIX2vl32APbAIQ%3D%3D@bh-user-app-db.mongo.cosmos.azure.com:10255/?ssl=true&appName=@bh-user-app-db@",
+        function (err, client) {
+
+            const db = client.db(dbName);
+
+            db.collection('users').findOne({id: req.params.userId}, (error, user) => {
+                console.log(user);
+                delete user._id;
+                res.send(user);
+            })
+            client.close();
+        });
 });
 
 
